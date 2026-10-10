@@ -1,0 +1,192 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-08T11:35:16.701171+00:00",
+    "checkpoint": "models/best_model.pt",
+    "device": "cpu",
+    "split": "val",
+    "num_samples": 34,
+    "threshold": 0.5,
+    "image_size": [
+      256,
+      256
+    ],
+    "post_processing": "none (plain sigmoid > threshold)",
+    "category_definitions": {
+      "Small Pedestrians": "GT area < 15% of frame",
+      "Medium/Full-Body Pedestrians": "15% <= GT area <= 50% of frame",
+      "Large/Close-Up Pedestrians": "GT area > 50% of frame"
+    }
+  },
+  "overall": {
+    "count": 34,
+    "mean_iou": 0.8251029936706319,
+    "mean_dice": 0.902150892159518
+  },
+  "categories": {
+    "Small Pedestrians": {
+      "count": 18,
+      "mean_iou": 0.8279274702072144,
+      "mean_dice": 0.9037363860342238
+    },
+    "Medium/Full-Body Pedestrians": {
+      "count": 16,
+      "mean_iou": 0.8219254575669765,
+      "mean_dice": 0.9003672115504742
+    },
+    "Large/Close-Up Pedestrians": {
+      "count": 0,
+      "mean_iou": null,
+      "mean_dice": null
+    }
+  },
+  "worst_cases": [
+    {
+      "rank": 1,
+      "image": "FudanPed00014.png",
+      "category": "Small Pedestrians",
+      "iou": 0.571582555770874,
+      "dice": 0.7273974418640137,
+      "precision": 0.6011337637901306,
+      "recall": 0.920805811882019,
+      "gt_area_pct": 8.7860107421875,
+      "pred_area_pct": 13.458251953125,
+      "max_probability": 0.9998619556427002,
+      "diagnosis": "boundary/overlap error (similar area, poor alignment)",
+      "artifact": "evaluation\\artifacts\\worst_01_FudanPed00014_iou0.572.png"
+    },
+    {
+      "rank": 2,
+      "image": "PennPed00002.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.6519408822059631,
+      "dice": 0.7893028855323792,
+      "precision": 0.6769300103187561,
+      "recall": 0.9464106559753418,
+      "gt_area_pct": 24.31640625,
+      "pred_area_pct": 33.99658203125,
+      "max_probability": 0.9999645948410034,
+      "diagnosis": "boundary/overlap error (similar area, poor alignment)",
+      "artifact": "evaluation\\artifacts\\worst_02_PennPed00002_iou0.652.png"
+    },
+    {
+      "rank": 3,
+      "image": "PennPed00019.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.717112123966217,
+      "dice": 0.8352536559104919,
+      "precision": 0.9428384304046631,
+      "recall": 0.7497066855430603,
+      "gt_area_pct": 35.11505126953125,
+      "pred_area_pct": 27.92205810546875,
+      "max_probability": 0.9998855590820312,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\worst_03_PennPed00019_iou0.717.png"
+    },
+    {
+      "rank": 4,
+      "image": "FudanPed00003.png",
+      "category": "Small Pedestrians",
+      "iou": 0.7313899993896484,
+      "dice": 0.8448587656021118,
+      "precision": 0.7505492568016052,
+      "recall": 0.9662750363349915,
+      "gt_area_pct": 7.012939453125,
+      "pred_area_pct": 9.02862548828125,
+      "max_probability": 0.9999212026596069,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\worst_04_FudanPed00003_iou0.731.png"
+    },
+    {
+      "rank": 5,
+      "image": "FudanPed00043.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.7431955933570862,
+      "dice": 0.8526818156242371,
+      "precision": 0.7646830081939697,
+      "recall": 0.9635680317878723,
+      "gt_area_pct": 18.6798095703125,
+      "pred_area_pct": 23.5382080078125,
+      "max_probability": 0.9999167919158936,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\worst_05_FudanPed00043_iou0.743.png"
+    }
+  ],
+  "best_cases": [
+    {
+      "rank": 1,
+      "image": "FudanPed00070.png",
+      "category": "Small Pedestrians",
+      "iou": 0.9444818496704102,
+      "dice": 0.9714483618736267,
+      "precision": 0.9833052754402161,
+      "recall": 0.9598740339279175,
+      "gt_area_pct": 11.1419677734375,
+      "pred_area_pct": 10.87646484375,
+      "max_probability": 0.9998729228973389,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\best_01_FudanPed00070_iou0.944.png"
+    },
+    {
+      "rank": 2,
+      "image": "FudanPed00018.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.9202256202697754,
+      "dice": 0.9584557414054871,
+      "precision": 0.9692568778991699,
+      "recall": 0.9478926658630371,
+      "gt_area_pct": 16.54510498046875,
+      "pred_area_pct": 16.180419921875,
+      "max_probability": 0.9998781681060791,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\best_02_FudanPed00018_iou0.920.png"
+    },
+    {
+      "rank": 3,
+      "image": "FudanPed00034.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.9122329950332642,
+      "dice": 0.9541023373603821,
+      "precision": 0.983668327331543,
+      "recall": 0.926261842250824,
+      "gt_area_pct": 15.478515625,
+      "pred_area_pct": 14.5751953125,
+      "max_probability": 0.9996401071548462,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\best_03_FudanPed00034_iou0.912.png"
+    },
+    {
+      "rank": 4,
+      "image": "PennPed00054.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.9114468693733215,
+      "dice": 0.9536722302436829,
+      "precision": 0.9315799474716187,
+      "recall": 0.9768377542495728,
+      "gt_area_pct": 15.54718017578125,
+      "pred_area_pct": 16.302490234375,
+      "max_probability": 0.9999071359634399,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\best_04_PennPed00054_iou0.911.png"
+    },
+    {
+      "rank": 5,
+      "image": "PennPed00065.png",
+      "category": "Medium/Full-Body Pedestrians",
+      "iou": 0.9061325788497925,
+      "dice": 0.9507550001144409,
+      "precision": 0.969744086265564,
+      "recall": 0.9324954152107239,
+      "gt_area_pct": 17.35992431640625,
+      "pred_area_pct": 16.693115234375,
+      "max_probability": 0.9999004602432251,
+      "diagnosis": "good",
+      "artifact": "evaluation\\artifacts\\best_05_PennPed00065_iou0.906.png"
+    }
+  ],
+  "inversion_audit": {
+    "num_flagged": 0,
+    "num_images": 34,
+    "note": "Flagged = inverted mask would have a higher IoU. Diagnostic only.",
+    "flagged_images": []
+  }
+}

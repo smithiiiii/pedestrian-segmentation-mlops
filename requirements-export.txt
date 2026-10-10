@@ -1,0 +1,10 @@
+# One-off tooling for training/export_onnx.py (NOT installed in the Docker image).
+# Install in your local/Colab environment:  pip install -r requirements-export.txt
+-r requirements.txt
+ 
+torch
+torchvision
+segmentation-models-pytorch   # use the same version that was used for training
+onnx                          # structure verification
+albumentations                # preprocessing parity check against the training pipeline
+ 

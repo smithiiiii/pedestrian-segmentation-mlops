@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-08T11:27:20.735060+00:00",
+    "checkpoint": "models/best_model.pt",
+    "device": "cpu",
+    "split": "val",
+    "num_samples": 34,
+    "image_size": [
+      256,
+      256
+    ],
+    "split_seed": 42,
+    "val_split": 0.2,
+    "epsilon": 1e-07,
+    "std_type": "sample (ddof=1)"
+  },
+  "thresholds": [
+    {
+      "threshold": 0.3,
+      "mean_iou": 0.8115658760070801,
+      "std_iou": 0.08317267149686813,
+      "mean_dice": 0.8935917019844055,
+      "std_dice": 0.05379599332809448,
+      "mean_precision": 0.8475460410118103,
+      "std_precision": 0.090175561606884,
+      "mean_recall": 0.9528676271438599,
+      "std_recall": 0.040024660527706146
+    },
+    {
+      "threshold": 0.4,
+      "mean_iou": 0.8219440579414368,
+      "std_iou": 0.08005982637405396,
+      "mean_dice": 0.9000855684280396,
+      "std_dice": 0.05138245224952698,
+      "mean_precision": 0.8721131086349487,
+      "std_precision": 0.08751749247312546,
+      "mean_recall": 0.9373169541358948,
+      "std_recall": 0.04476100206375122
+    },
+    {
+      "threshold": 0.5,
+      "mean_iou": 0.8251030445098877,
+      "std_iou": 0.07715687155723572,
+      "mean_dice": 0.9021508693695068,
+      "std_dice": 0.04936142638325691,
+      "mean_precision": 0.8885918259620667,
+      "std_precision": 0.08474721759557724,
+      "mean_recall": 0.9231678247451782,
+      "std_recall": 0.04832781106233597
+    },
+    {
+      "threshold": 0.6,
+      "mean_iou": 0.824606716632843,
+      "std_iou": 0.0750693753361702,
+      "mean_dice": 0.9019579887390137,
+      "std_dice": 0.048077575862407684,
+      "mean_precision": 0.9022397994995117,
+      "std_precision": 0.08217799663543701,
+      "mean_recall": 0.9083962440490723,
+      "std_recall": 0.051536478102207184
+    },
+    {
+      "threshold": 0.7,
+      "mean_iou": 0.8192668557167053,
+      "std_iou": 0.07278978824615479,
+      "mean_dice": 0.8988421559333801,
+      "std_dice": 0.0468096025288105,
+      "mean_precision": 0.914705753326416,
+      "std_precision": 0.0793161392211914,
+      "mean_recall": 0.8900070786476135,
+      "std_recall": 0.0551745630800724
+    }
+  ],
+  "optimal": {
+    "criterion": "max mean_iou",
+    "threshold": 0.5,
+    "mean_iou": 0.8251030445098877,
+    "mean_dice": 0.9021508693695068,
+    "mean_precision": 0.8885918259620667,
+    "mean_recall": 0.9231678247451782
+  }
+}

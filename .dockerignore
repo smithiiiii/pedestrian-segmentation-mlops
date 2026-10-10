@@ -1,0 +1,50 @@
+# --- Local environments & caches --------------------------------------------
+venv/
+.venv/
+env/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+ 
+# --- Version control & editor files -----------------------------------------
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+.DS_Store
+ 
+# --- Large or non-runtime project directories --------------------------------
+data/
+media/
+training/
+evaluation/
+notebooks/
+*.ipynb
+logs/
+*.log
+ 
+# --- Code not used by the API container --------------------------------------
+api/
+src/
+app/streamlit_app.py
+ 
+# --- Secrets & local configuration ------------------------------------------
+.env
+.env.*
+ 
+# --- Docker / docs (not needed inside the image) ------------------------------
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+README*
+docs/
+ 
+# --- Models: ship only the ONNX file the API loads ----------------------------
+models/*
+!models/best_model_b.onnx
+ 

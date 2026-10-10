@@ -1,0 +1,21 @@
+# Runtime dependencies for the pedestrian segmentation API (Python 3.10).
+# PyTorch-free: inference runs on ONNX Runtime (models/best_model_b.onnx).
+# To (re-)export the model you also need requirements-export.txt on a machine with PyTorch.
+# Versions are left open except for sensible floors; once a build works, freeze the exact
+# versions (`pip freeze`) and build from that lock.
+ 
+# --- Inference ------------------------------------------------------------------
+onnxruntime                   # CPUExecutionProvider
+numpy
+opencv-python-headless        # headless build: no libGL/X11 GUI dependencies
+pyyaml                        # reads configs/config.yaml
+ 
+# --- API server -----------------------------------------------------------------
+fastapi>=0.110
+uvicorn[standard]
+pydantic>=2.0
+python-multipart              # required by FastAPI for UploadFile / multipart forms
+ 
+# --- Client / test utility ------------------------------------------------------
+requests                      # used by the Streamlit client and smoke tests, not by the API itself
+ 
