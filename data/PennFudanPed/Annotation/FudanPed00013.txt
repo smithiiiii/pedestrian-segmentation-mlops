@@ -10,4 +10,3 @@ Objects with ground truth : 1 { "PASpersonWalking" }
 Original label for object 1 "PASpersonWalking" : "PennFudanPed"
 Bounding box for object 1 "PASpersonWalking" (Xmin, Ymin) - (Xmax, Ymax) : (389, 193) - (554, 476)
 Pixel mask for object 1 "PASpersonWalking" : "PennFudanPed/PedMasks/FudanPed00013_mask.png"
-

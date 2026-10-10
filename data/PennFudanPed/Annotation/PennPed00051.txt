@@ -25,4 +25,3 @@ Pixel mask for object 3 "PASpersonWalking" : "PennFudanPed/PedMasks/PennPed00051
 Original label for object 4 "PASpersonWalking" : "PennFudanPed"
 Bounding box for object 4 "PASpersonWalking" (Xmin, Ymin) - (Xmax, Ymax) : (554, 67) - (628, 339)
 Pixel mask for object 4 "PASpersonWalking" : "PennFudanPed/PedMasks/PennPed00051_mask.png"
-

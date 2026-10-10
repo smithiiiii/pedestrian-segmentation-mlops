@@ -26,18 +26,18 @@ Bounding box for object 2 "PASpersonWalking" (Xmin, Ymin) - (Xmax, Ymax) : (420,
 Pixel mask for object 2 "PASpersonWalking" : "PennFudanPed/PedMasks/FudanPed00001_mask.png"
 
 2. Notice
-   In [1], we did not label very small, highly occluded pedestrians. 
+   In [1], we did not label very small, highly occluded pedestrians.
 However in this release of the dataset, we have labeled these pedestrians for future detection.
 We list the newly-labeled pedestrians in the file "added-object-list.txt".
 
    Please download PASCAL toolkit (http://www.pascal-network.org/challenges/VOC/PAScode.tar.gz) to view the annotated pedestrians.
-   
+
 3. Acknowledgement
 
 This material is presented to ensure timely dissemination of scholarly and technical work.
-Copyright and all rights therein are retained by authors or by other copyright holders. 
- All persons copying this information are expected to adhere to the terms and constraints invoked by 
- each author's copyright. In most cases, these works may not be reposted without 
+Copyright and all rights therein are retained by authors or by other copyright holders.
+ All persons copying this information are expected to adhere to the terms and constraints invoked by
+ each author's copyright. In most cases, these works may not be reposted without
  the explicit permission of the copyright holder.
 
 4. Related publication

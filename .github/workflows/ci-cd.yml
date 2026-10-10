@@ -1,23 +1,29 @@
 name: CI/CD
- 
+
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   workflow_dispatch:
- 
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
- 
+
 permissions:
   contents: read
- 
+
 env:
   PYTHON_VERSION: "3.10"
   IMAGE_NAME: pedestrian-seg-api
   IMAGE_TAG: v2
- 
+
 jobs:
   lint:
     name: Lint & format
@@ -28,13 +34,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install ruff
-        run: pip install ruff
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install dev tooling
+        run: pip install -r requirements-dev.txt
       - name: Lint
         run: ruff check .
       - name: Check formatting
         run: ruff format --check .
- 
+
   test:
     name: Unit & parity tests
     needs: lint
@@ -48,12 +56,14 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-          cache-dependency-path: requirements.txt
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest
+        run: pip install -r requirements.txt -r requirements-dev.txt
       - name: Run tests
         run: pytest
- 
+
   docker:
     name: Docker build & smoke test
     needs: test
@@ -101,4 +111,3 @@ jobs:
       - name: Remove container
         if: always()
         run: docker rm -f seg-api
- 
