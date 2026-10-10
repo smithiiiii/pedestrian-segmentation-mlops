@@ -37,9 +37,7 @@ class InferenceEngine:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.transforms = get_inference_transforms(
-            prep_cfg["image_size"], prep_cfg["mean"], prep_cfg["std"]
-        )
+        self.transforms = get_inference_transforms(prep_cfg["image_size"], prep_cfg["mean"], prep_cfg["std"])
 
         self.model = smp.Unet(
             encoder_name=model_cfg["encoder_name"],
@@ -89,7 +87,5 @@ class InferenceEngine:
             probs = torch.sigmoid(logits)[0, 0].cpu().numpy()
 
         mask = (probs > threshold).astype(np.uint8) * 255
-        mask_img = Image.fromarray(mask, mode="L").resize(
-            (orig_w, orig_h), Image.NEAREST
-        )
+        mask_img = Image.fromarray(mask, mode="L").resize((orig_w, orig_h), Image.NEAREST)
         return np.array(mask_img, dtype=np.uint8)

@@ -27,9 +27,7 @@ from app.onnx_inference import (
     OnnxSegmentationService as SegmentationService,
 )  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 logger = logging.getLogger("pedseg.api")
 
 ALLOWED_CONTENT_TYPES = {"image/png", "image/jpeg"}
@@ -55,9 +53,7 @@ class PredictionResponse(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Loading segmentation model...")
-    app.state.service = (
-        SegmentationService()
-    )  # a failure here aborts startup with a clear error
+    app.state.service = SegmentationService()  # a failure here aborts startup with a clear error
     logger.info("Model loaded; API is ready.")
     yield
     app.state.service = None
@@ -86,9 +82,7 @@ def get_service(request: Request) -> SegmentationService:
 @app.get("/health", response_model=HealthResponse)
 async def health(request: Request) -> HealthResponse:
     loaded = getattr(request.app.state, "service", None) is not None
-    return HealthResponse(
-        status="healthy" if loaded else "unhealthy", model_loaded=loaded
-    )
+    return HealthResponse(status="healthy" if loaded else "unhealthy", model_loaded=loaded)
 
 
 @app.post("/predict", response_model=PredictionResponse)

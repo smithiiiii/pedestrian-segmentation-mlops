@@ -68,13 +68,9 @@ def test_preprocess_shape_dtype_layout(sample_image):
 
 
 def test_preprocess_matches_reference_formula(sample_image):
-    resized = cv2.resize(
-        sample_image, (IMAGE_SIZE[1], IMAGE_SIZE[0]), interpolation=cv2.INTER_LINEAR
-    )
+    resized = cv2.resize(sample_image, (IMAGE_SIZE[1], IMAGE_SIZE[0]), interpolation=cv2.INTER_LINEAR)
     scaled = resized.astype(np.float32) / 255.0
-    expected = (
-        (scaled - np.array(MEAN, np.float32)) / np.array(STD, np.float32)
-    ).transpose(2, 0, 1)[None]
+    expected = ((scaled - np.array(MEAN, np.float32)) / np.array(STD, np.float32)).transpose(2, 0, 1)[None]
     actual = preprocess_image(sample_image, IMAGE_SIZE, MEAN, STD)
     np.testing.assert_allclose(actual, expected, atol=1e-5)
 

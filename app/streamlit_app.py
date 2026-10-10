@@ -26,10 +26,7 @@ def extract_error_detail(response: requests.Response) -> str:
     except (ValueError, AttributeError):
         return response.text or response.reason
     if isinstance(detail, list):
-        return "; ".join(
-            str(item.get("msg", item)) if isinstance(item, dict) else str(item)
-            for item in detail
-        )
+        return "; ".join(str(item.get("msg", item)) if isinstance(item, dict) else str(item) for item in detail)
     return str(detail)
 
 
@@ -42,20 +39,14 @@ def fetch_prediction(image_bytes: bytes, filename: str, content_type: str) -> di
             timeout=(CONNECT_TIMEOUT_S, READ_TIMEOUT_S),
         )
     except requests.exceptions.ConnectionError as exc:
-        raise ApiError(
-            f"Cannot reach the API at {API_URL}. Is the container running on port 8000?"
-        ) from exc
+        raise ApiError(f"Cannot reach the API at {API_URL}. Is the container running on port 8000?") from exc
     except requests.exceptions.Timeout as exc:
-        raise ApiError(
-            f"The API did not respond within {READ_TIMEOUT_S} seconds."
-        ) from exc
+        raise ApiError(f"The API did not respond within {READ_TIMEOUT_S} seconds.") from exc
     except requests.exceptions.RequestException as exc:
         raise ApiError(f"Request failed: {exc}") from exc
 
     if response.status_code != 200:
-        raise ApiError(
-            f"API error {response.status_code}: {extract_error_detail(response)}"
-        )
+        raise ApiError(f"API error {response.status_code}: {extract_error_detail(response)}")
 
     try:
         payload = response.json()
@@ -97,16 +88,12 @@ def blend_overlay(image: Image.Image, mask: np.ndarray, opacity: float) -> Image
 
 
 def main() -> None:
-    st.set_page_config(
-        page_title="Pedestrian Segmentation", page_icon="🚶", layout="wide"
-    )
+    st.set_page_config(page_title="Pedestrian Segmentation", page_icon="🚶", layout="wide")
     st.title("🚶 Pedestrian Segmentation")
     st.caption(f"U-Net (ResNet34) on ONNX Runtime · endpoint: {API_URL}")
 
     uploaded = st.file_uploader("Upload an image", type=list(CONTENT_TYPES))
-    opacity = st.slider(
-        "Overlay opacity", min_value=0.0, max_value=1.0, value=0.5, step=0.05
-    )
+    opacity = st.slider("Overlay opacity", min_value=0.0, max_value=1.0, value=0.5, step=0.05)
 
     if uploaded is None:
         st.info("Upload a PNG or JPEG image to get started.")
@@ -114,9 +101,7 @@ def main() -> None:
 
     image_bytes = uploaded.getvalue()
     extension = uploaded.name.rsplit(".", 1)[-1].lower()
-    content_type = CONTENT_TYPES.get(
-        extension, uploaded.type or "application/octet-stream"
-    )
+    content_type = CONTENT_TYPES.get(extension, uploaded.type or "application/octet-stream")
 
     try:
         image = load_image(image_bytes)
@@ -144,9 +129,7 @@ def main() -> None:
         st.image(blend_overlay(image, mask, opacity), width="stretch")
 
     coverage = float(mask.mean()) * 100
-    st.caption(
-        f"Original shape (H×W): {tuple(result['original_shape'])} · pedestrian coverage: {coverage:.1f}%"
-    )
+    st.caption(f"Original shape (H×W): {tuple(result['original_shape'])} · pedestrian coverage: {coverage:.1f}%")
 
 
 main()

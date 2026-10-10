@@ -27,7 +27,5 @@ def preprocess_image(image_bytes: bytes):
 
 def postprocess_mask(binary_mask: np.ndarray, orig_shape: tuple) -> np.ndarray:
     orig_h, orig_w = orig_shape
-    resized_mask = cv2.resize(
-        binary_mask, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST
-    )
+    resized_mask = cv2.resize(binary_mask, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
     return (resized_mask * 255).astype(np.uint8)
