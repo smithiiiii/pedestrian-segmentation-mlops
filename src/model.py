@@ -6,7 +6,11 @@ class SegmentationModel(nn.Module):
     def __init__(self):
         super(SegmentationModel, self).__init__()
         self.arc = smp.Unet(
-            encoder_name="efficientnet-b0", encoder_weights="imagenet", in_channels=3, classes=1, activation=None
+            encoder_name="efficientnet-b0",
+            encoder_weights="imagenet",
+            in_channels=3,
+            classes=1,
+            activation=None,
         )
 
     def forward(self, images, masks=None):

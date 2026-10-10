@@ -7,7 +7,11 @@ import numpy as np
 import pytest
 import yaml
 
-from app.onnx_inference import InvalidImageError, OnnxSegmentationService, preprocess_image
+from app.onnx_inference import (
+    InvalidImageError,
+    OnnxSegmentationService,
+    preprocess_image,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 ONNX_PATH = ROOT / "models" / "best_model_b.onnx"
@@ -25,7 +29,10 @@ def require_model() -> None:
     if ONNX_PATH.exists():
         return
     if os.environ.get("CI"):
-        pytest.fail(f"Missing {ONNX_PATH}; commit it (Git LFS) so CI can test it.", pytrace=False)
+        pytest.fail(
+            f"Missing {ONNX_PATH}; commit it (Git LFS) so CI can test it.",
+            pytrace=False,
+        )
     pytest.skip(f"{ONNX_PATH.name} not found; run training/export_onnx.py first.")
 
 
@@ -61,9 +68,13 @@ def test_preprocess_shape_dtype_layout(sample_image):
 
 
 def test_preprocess_matches_reference_formula(sample_image):
-    resized = cv2.resize(sample_image, (IMAGE_SIZE[1], IMAGE_SIZE[0]), interpolation=cv2.INTER_LINEAR)
+    resized = cv2.resize(
+        sample_image, (IMAGE_SIZE[1], IMAGE_SIZE[0]), interpolation=cv2.INTER_LINEAR
+    )
     scaled = resized.astype(np.float32) / 255.0
-    expected = ((scaled - np.array(MEAN, np.float32)) / np.array(STD, np.float32)).transpose(2, 0, 1)[None]
+    expected = (
+        (scaled - np.array(MEAN, np.float32)) / np.array(STD, np.float32)
+    ).transpose(2, 0, 1)[None]
     actual = preprocess_image(sample_image, IMAGE_SIZE, MEAN, STD)
     np.testing.assert_allclose(actual, expected, atol=1e-5)
 

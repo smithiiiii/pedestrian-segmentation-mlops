@@ -102,7 +102,9 @@ def load_model(config: dict, device: torch.device) -> torch.nn.Module:
     return model
 
 
-def per_image_metrics(probs: torch.Tensor, target: torch.Tensor, threshold: float) -> Dict[str, torch.Tensor]:
+def per_image_metrics(
+    probs: torch.Tensor, target: torch.Tensor, threshold: float
+) -> Dict[str, torch.Tensor]:
     """Compute IoU, Dice, Precision, Recall for each image in a batch.
 
     Args:
@@ -136,7 +138,9 @@ def run_evaluation(
     device: torch.device,
 ) -> Dict[float, Dict[str, np.ndarray]]:
     """Single forward pass per batch; metrics computed for every threshold."""
-    collected: Dict[float, Dict[str, List[np.ndarray]]] = {t: {m: [] for m in METRIC_NAMES} for t in thresholds}
+    collected: Dict[float, Dict[str, List[np.ndarray]]] = {
+        t: {m: [] for m in METRIC_NAMES} for t in thresholds
+    }
 
     for images, masks, _names in loader:
         images = images.to(device)
@@ -148,7 +152,10 @@ def run_evaluation(
             for m in METRIC_NAMES:
                 collected[t][m].append(scores[m].cpu().numpy())
 
-    return {t: {m: np.concatenate(collected[t][m]) for m in METRIC_NAMES} for t in thresholds}
+    return {
+        t: {m: np.concatenate(collected[t][m]) for m in METRIC_NAMES}
+        for t in thresholds
+    }
 
 
 def summarize(per_image: Dict[float, Dict[str, np.ndarray]]) -> List[dict]:
@@ -171,15 +178,22 @@ def print_table(rows: List[dict], n_samples: int) -> None:
     print(line)
     for r in rows:
         cells = [f"{r[f'mean_{m}']:.4f} ± {r[f'std_{m}']:.4f}" for m in METRIC_NAMES]
-        print(f"{r['threshold']:>9.2f} | {cells[0]:>17} | {cells[1]:>17} | {cells[2]:>17} | {cells[3]:>17}")
+        print(
+            f"{r['threshold']:>9.2f} | {cells[0]:>17} | {cells[1]:>17} | {cells[2]:>17} | {cells[3]:>17}"
+        )
     print(line)
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Evaluate the pedestrian U-Net with a threshold sweep.")
+    p = argparse.ArgumentParser(
+        description="Evaluate the pedestrian U-Net with a threshold sweep."
+    )
     p.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     p.add_argument(
-        "--data-root", type=Path, default=DEFAULT_DATA_ROOT, help="Path to the unzipped PennFudanPed folder."
+        "--data-root",
+        type=Path,
+        default=DEFAULT_DATA_ROOT,
+        help="Path to the unzipped PennFudanPed folder.",
     )
     p.add_argument("--split", choices=["val", "train", "all"], default="val")
     p.add_argument("--val-split", type=float, default=0.2, help="Must match training.")
@@ -199,7 +213,9 @@ def main() -> int:
             print(f"Invalid threshold {t}: must be within [0, 1].", file=sys.stderr)
             return 1
 
-    config_path = args.config if args.config.is_absolute() else PROJECT_ROOT / args.config
+    config_path = (
+        args.config if args.config.is_absolute() else PROJECT_ROOT / args.config
+    )
     if not config_path.exists():
         print(f"Config not found: {config_path}", file=sys.stderr)
         return 1
@@ -208,10 +224,16 @@ def main() -> int:
 
     prep = config["preprocessing"]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    data_root = args.data_root if args.data_root.is_absolute() else PROJECT_ROOT / args.data_root
+    data_root = (
+        args.data_root
+        if args.data_root.is_absolute()
+        else PROJECT_ROOT / args.data_root
+    )
 
     files = list_split_files(data_root, args.split, args.val_split, args.seed)
-    dataset = PennFudanEvalDataset(data_root, files, prep["image_size"], prep["mean"], prep["std"])
+    dataset = PennFudanEvalDataset(
+        data_root, files, prep["image_size"], prep["mean"], prep["std"]
+    )
     loader = DataLoader(
         dataset,
         batch_size=args.batch_size,
@@ -221,7 +243,9 @@ def main() -> int:
     )
 
     model = load_model(config, device)
-    print(f"Device: {device} | split: {args.split} | images: {len(dataset)} | input size: {tuple(prep['image_size'])}")
+    print(
+        f"Device: {device} | split: {args.split} | images: {len(dataset)} | input size: {tuple(prep['image_size'])}"
+    )
     if args.split == "all":
         print("WARNING: 'all' includes training images; scores will be optimistic.")
 
@@ -239,7 +263,9 @@ def main() -> int:
     )
     print(f"Evaluation time: {elapsed:.1f}s")
 
-    output_path = args.output if args.output.is_absolute() else PROJECT_ROOT / args.output
+    output_path = (
+        args.output if args.output.is_absolute() else PROJECT_ROOT / args.output
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     report = {
         "metadata": {

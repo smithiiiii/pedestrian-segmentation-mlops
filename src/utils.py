@@ -3,7 +3,9 @@ import torch
 from src.model import SegmentationModel
 
 
-def load_trained_model(model_path: str = "best_model.pt", device: str = "cpu") -> SegmentationModel:
+def load_trained_model(
+    model_path: str = "best_model.pt", device: str = "cpu"
+) -> SegmentationModel:
     """
     Loads trained weights safely into the SegmentationModel instance.
     Handles both state_dict and full model objects.

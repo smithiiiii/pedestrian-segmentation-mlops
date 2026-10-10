@@ -14,7 +14,6 @@ import torch
 import yaml
 from albumentations.pytorch import ToTensorV2
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = PROJECT_ROOT / "configs" / "config.yaml"
 MANIFEST_PATH = PROJECT_ROOT / "data" / "combined_train_manifest.csv"
@@ -82,7 +81,10 @@ def main() -> int:
     model.eval()
 
     if not MANIFEST_PATH.exists():
-        print(f"Manifest not found: {MANIFEST_PATH}. Run training/prepare_coco_subset.py first.", file=sys.stderr)
+        print(
+            f"Manifest not found: {MANIFEST_PATH}. Run training/prepare_coco_subset.py first.",
+            file=sys.stderr,
+        )
         return 1
     df = pd.read_csv(MANIFEST_PATH)
     if df.empty:
@@ -107,7 +109,9 @@ def main() -> int:
         image = read_rgb(resolve(record["image_path"]))
         gt_mask = read_binary_mask(resolve(record["mask_path"]))
         if image.shape[:2] != gt_mask.shape[:2]:
-            print(f"Image/mask size mismatch for {record['image_path']}", file=sys.stderr)
+            print(
+                f"Image/mask size mismatch for {record['image_path']}", file=sys.stderr
+            )
             return 1
 
         input_tensor = infer_tfm(image=image)["image"].unsqueeze(0).to(device)
@@ -123,7 +127,9 @@ def main() -> int:
         iou = (inter + 1e-7) / (union + 1e-7)
 
         axes[row, 0].imshow(shown_image)
-        axes[row, 0].set_title(f"Input ({record['source']}, {record['size_bin']})", fontsize=9)
+        axes[row, 0].set_title(
+            f"Input ({record['source']}, {record['size_bin']})", fontsize=9
+        )
         axes[row, 1].imshow(shown_gt, cmap="gray", vmin=0, vmax=1)
         axes[row, 1].set_title("Ground Truth Mask", fontsize=9)
         axes[row, 2].imshow(pred_mask, cmap="gray", vmin=0, vmax=1)

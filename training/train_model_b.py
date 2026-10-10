@@ -65,7 +65,9 @@ class CombinedSegmentationDataset(Dataset):
         image_path = self._resolve(row["image_path"])
         mask_path = self._resolve(row["mask_path"])
 
-        image = cv2.imread(str(image_path), cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+        image = cv2.imread(
+            str(image_path), cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
+        )
         if image is None:
             raise FileNotFoundError(f"Could not read image: {image_path}")
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -76,13 +78,17 @@ class CombinedSegmentationDataset(Dataset):
         mask = (mask > 127).astype(np.float32)
 
         if image.shape[:2] != mask.shape[:2]:
-            raise ValueError(f"Image/mask size mismatch for {image_path.name}: {image.shape[:2]} vs {mask.shape[:2]}")
+            raise ValueError(
+                f"Image/mask size mismatch for {image_path.name}: {image.shape[:2]} vs {mask.shape[:2]}"
+            )
 
         out = self.transform(image=image, mask=mask)
         return out["image"], out["mask"].float().unsqueeze(0)
 
 
-def get_train_transforms(image_size: Sequence[int], mean: Sequence[float], std: Sequence[float]) -> A.Compose:
+def get_train_transforms(
+    image_size: Sequence[int], mean: Sequence[float], std: Sequence[float]
+) -> A.Compose:
     return A.Compose(
         [
             A.Resize(int(image_size[0]), int(image_size[1])),
@@ -163,7 +169,9 @@ def main() -> int:
     train_cfg.update(config.get("training") or {})
 
     epochs = int(args.epochs if args.epochs is not None else train_cfg["epochs"])
-    batch_size = int(args.batch_size if args.batch_size is not None else train_cfg["batch_size"])
+    batch_size = int(
+        args.batch_size if args.batch_size is not None else train_cfg["batch_size"]
+    )
     lr = float(train_cfg["learning_rate"])
     seed = int(train_cfg["seed"])
 
@@ -179,7 +187,8 @@ def main() -> int:
     df = pd.read_csv(manifest_path)
     validate_manifest_files(df)
     dataset = CombinedSegmentationDataset(
-        df, get_train_transforms(prep_cfg["image_size"], prep_cfg["mean"], prep_cfg["std"])
+        df,
+        get_train_transforms(prep_cfg["image_size"], prep_cfg["mean"], prep_cfg["std"]),
     )
 
     loader = DataLoader(
@@ -221,7 +230,10 @@ def main() -> int:
     start = time.time()
     total_batches = len(loader)
 
-    print(f"\n[STEP 5/5] READY! Starting Epoch 1/{epochs} ({total_batches} batches total)...", flush=True)
+    print(
+        f"\n[STEP 5/5] READY! Starting Epoch 1/{epochs} ({total_batches} batches total)...",
+        flush=True,
+    )
 
     for epoch in range(1, epochs + 1):
         model.train()

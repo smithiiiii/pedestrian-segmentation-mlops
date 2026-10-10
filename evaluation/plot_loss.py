@@ -32,7 +32,9 @@ def load_history(path: Path) -> tuple:
     losses = [float(v) for v in history["train_loss"]]
     epochs = history.get("epoch") or list(range(1, len(losses) + 1))
     if len(epochs) != len(losses):
-        raise ValueError(f"'epoch' ({len(epochs)}) and 'train_loss' ({len(losses)}) lengths differ.")
+        raise ValueError(
+            f"'epoch' ({len(epochs)}) and 'train_loss' ({len(losses)}) lengths differ."
+        )
     return epochs, losses
 
 

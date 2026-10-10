@@ -50,8 +50,13 @@ class SegmentationService:
 
         model_cfg = config["model"]
         prep_cfg = config["preprocessing"]
-        self.image_size = (int(prep_cfg["image_size"][0]), int(prep_cfg["image_size"][1]))
-        self.threshold = float((config.get("inference") or {}).get("default_threshold", 0.5))
+        self.image_size = (
+            int(prep_cfg["image_size"][0]),
+            int(prep_cfg["image_size"][1]),
+        )
+        self.threshold = float(
+            (config.get("inference") or {}).get("default_threshold", 0.5)
+        )
         self.max_image_bytes = int(max_image_bytes)
         self.device = torch.device("cpu")
 
@@ -93,7 +98,9 @@ class SegmentationService:
     def _decode(self, image_bytes: bytes) -> np.ndarray:
         """Decode raw bytes to an RGB uint8 array; raise InvalidImageError on any failure."""
         if not isinstance(image_bytes, (bytes, bytearray, memoryview)):
-            raise InvalidImageError(f"Expected bytes, got {type(image_bytes).__name__}.")
+            raise InvalidImageError(
+                f"Expected bytes, got {type(image_bytes).__name__}."
+            )
         if len(image_bytes) == 0:
             raise InvalidImageError("Empty image payload.")
         if len(image_bytes) > self.max_image_bytes:
@@ -108,7 +115,9 @@ class SegmentationService:
             raise InvalidImageError(f"Could not decode image: {exc}") from exc
 
         if image_bgr is None or image_bgr.size == 0:
-            raise InvalidImageError("Could not decode image: unsupported or corrupted data.")
+            raise InvalidImageError(
+                "Could not decode image: unsupported or corrupted data."
+            )
         return cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
     @staticmethod

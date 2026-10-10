@@ -16,7 +16,9 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "config.yaml"
 DEFAULT_MODEL_PATH = PROJECT_ROOT / "models" / "best_model_b.onnx"
-DEFAULT_MAX_IMAGE_BYTES = 20 * 1024 * 1024  # reject absurdly large uploads before decoding
+DEFAULT_MAX_IMAGE_BYTES = (
+    20 * 1024 * 1024
+)  # reject absurdly large uploads before decoding
 
 
 class InvalidImageError(ValueError):
@@ -69,20 +71,27 @@ class OnnxSegmentationService:
             config = yaml.safe_load(f)
 
         prep_cfg = config["preprocessing"]
-        self.image_size: Tuple[int, int] = (int(prep_cfg["image_size"][0]), int(prep_cfg["image_size"][1]))
+        self.image_size: Tuple[int, int] = (
+            int(prep_cfg["image_size"][0]),
+            int(prep_cfg["image_size"][1]),
+        )
         self.mean = tuple(float(v) for v in prep_cfg["mean"])
         self.std = tuple(float(v) for v in prep_cfg["std"])
         self.max_image_bytes = int(max_image_bytes)
 
         threshold = float((config.get("inference") or {}).get("default_threshold", 0.5))
         if not 0.0 < threshold < 1.0:
-            raise ValueError(f"inference.default_threshold must be in (0, 1), got {threshold}")
+            raise ValueError(
+                f"inference.default_threshold must be in (0, 1), got {threshold}"
+            )
         self.threshold = threshold
         # sigmoid(z) > t  <=>  z > log(t / (1 - t)); thresholding logits skips a 65k-element sigmoid.
         self.logit_threshold = math.log(threshold / (1.0 - threshold))
 
         if intra_op_num_threads is None:
-            intra_op_num_threads = int(os.environ.get("ORT_INTRA_OP_THREADS", "0"))  # 0 = ORT decides
+            intra_op_num_threads = int(
+                os.environ.get("ORT_INTRA_OP_THREADS", "0")
+            )  # 0 = ORT decides
 
         options = ort.SessionOptions()
         options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
@@ -92,10 +101,16 @@ class OnnxSegmentationService:
 
         try:
             self.session = ort.InferenceSession(
-                str(model_path), sess_options=options, providers=["CPUExecutionProvider"]
+                str(model_path),
+                sess_options=options,
+                providers=["CPUExecutionProvider"],
             )
-        except Exception as exc:  # noqa: BLE001 - onnxruntime raises several exception types
-            raise RuntimeError(f"Failed to load ONNX model {model_path.name}: {exc}") from exc
+        except (
+            Exception
+        ) as exc:  # noqa: BLE001 - onnxruntime raises several exception types
+            raise RuntimeError(
+                f"Failed to load ONNX model {model_path.name}: {exc}"
+            ) from exc
 
         model_input = self.session.get_inputs()[0]
         self.input_name: str = model_input.name
@@ -125,11 +140,18 @@ class OnnxSegmentationService:
     def _check_input_shape(self, shape: Sequence[object]) -> None:
         """Fail at startup if the ONNX input does not match the configured image size."""
         if len(shape) != 4:
-            raise RuntimeError(f"Expected a 4D (N, C, H, W) ONNX input, got shape {list(shape)}")
+            raise RuntimeError(
+                f"Expected a 4D (N, C, H, W) ONNX input, got shape {list(shape)}"
+            )
         _, channels, height, width = shape
         if isinstance(channels, int) and channels != 3:
-            raise RuntimeError(f"ONNX model expects {channels} channels, preprocessing produces 3.")
-        for name, onnx_dim, cfg_dim in (("height", height, self.image_size[0]), ("width", width, self.image_size[1])):
+            raise RuntimeError(
+                f"ONNX model expects {channels} channels, preprocessing produces 3."
+            )
+        for name, onnx_dim, cfg_dim in (
+            ("height", height, self.image_size[0]),
+            ("width", width, self.image_size[1]),
+        ):
             if isinstance(onnx_dim, int) and onnx_dim != cfg_dim:
                 raise RuntimeError(
                     f"ONNX model expects {name}={onnx_dim} but configs/config.yaml image_size "
@@ -139,7 +161,9 @@ class OnnxSegmentationService:
     def _decode(self, image_bytes: bytes) -> np.ndarray:
         """Decode raw bytes to an RGB uint8 array; raise InvalidImageError on any failure."""
         if not isinstance(image_bytes, (bytes, bytearray, memoryview)):
-            raise InvalidImageError(f"Expected bytes, got {type(image_bytes).__name__}.")
+            raise InvalidImageError(
+                f"Expected bytes, got {type(image_bytes).__name__}."
+            )
         if len(image_bytes) == 0:
             raise InvalidImageError("Empty image payload.")
         if len(image_bytes) > self.max_image_bytes:
@@ -155,7 +179,9 @@ class OnnxSegmentationService:
             raise InvalidImageError(f"Could not decode image: {exc}") from exc
 
         if image_bgr is None or image_bgr.size == 0:
-            raise InvalidImageError("Could not decode image: unsupported or corrupted data.")
+            raise InvalidImageError(
+                "Could not decode image: unsupported or corrupted data."
+            )
         return cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
     @staticmethod
@@ -197,7 +223,9 @@ class OnnxSegmentationService:
 
         logits = np.squeeze(outputs[0])  # (1, 1, H, W) or (1, H, W) -> (H, W)
         if logits.ndim != 2:
-            raise RuntimeError(f"Unexpected model output shape {np.asarray(outputs[0]).shape}.")
+            raise RuntimeError(
+                f"Unexpected model output shape {np.asarray(outputs[0]).shape}."
+            )
         mask = (logits > self.logit_threshold).astype(np.uint8) * 255
         inference_time_ms = (time.perf_counter() - start) * 1000.0
 

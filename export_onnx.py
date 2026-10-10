@@ -20,7 +20,9 @@ DEFAULT_OUTPUT = PROJECT_ROOT / "models" / "best_model_b.onnx"
 INPUT_NAME = "input"
 OUTPUT_NAME = "logits"
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s"
+)
 logger = logging.getLogger("export_onnx")
 
 
@@ -81,16 +83,24 @@ def validate_pytorch_model(model: torch.nn.Module, image_size: Tuple[int, int]) 
             out = model(torch.randn(batch, 3, height, width))
             expected = (batch, 1, height, width)
             if tuple(out.shape) != expected:
-                raise ExportError(f"Unexpected PyTorch output shape {tuple(out.shape)}; expected {expected}.")
+                raise ExportError(
+                    f"Unexpected PyTorch output shape {tuple(out.shape)}; expected {expected}."
+                )
             if not torch.isfinite(out).all():
                 raise ExportError("PyTorch model produced NaN/Inf values.")
-    logger.info("PyTorch model validated on CPU: output shape (N, 1, %d, %d), values finite.", height, width)
+    logger.info(
+        "PyTorch model validated on CPU: output shape (N, 1, %d, %d), values finite.",
+        height,
+        width,
+    )
 
 
 # --------------------------------------------------------------------------- #
 # 3. Export
 # --------------------------------------------------------------------------- #
-def export_to_onnx(model: torch.nn.Module, image_size: Tuple[int, int], output_path: Path, opset: int) -> None:
+def export_to_onnx(
+    model: torch.nn.Module, image_size: Tuple[int, int], output_path: Path, opset: int
+) -> None:
     height, width = image_size
     dummy = torch.randn(1, 3, height, width)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -103,7 +113,11 @@ def export_to_onnx(model: torch.nn.Module, image_size: Tuple[int, int], output_p
         output_names=[OUTPUT_NAME],
         dynamic_axes={INPUT_NAME: {0: "batch"}, OUTPUT_NAME: {0: "batch"}},
     )
-    logger.info("Exporting to %s (opset %d, dynamic batch, constant folding)...", output_path, opset)
+    logger.info(
+        "Exporting to %s (opset %d, dynamic batch, constant folding)...",
+        output_path,
+        opset,
+    )
     try:
         # Newer PyTorch defaults to the dynamo exporter, which re-targets the opset; the
         # TorchScript-based exporter honours opset 14 and dynamic_axes exactly as requested.
@@ -121,11 +135,15 @@ def export_to_onnx(model: torch.nn.Module, image_size: Tuple[int, int], output_p
 # --------------------------------------------------------------------------- #
 # 4. Verify the ONNX structure
 # --------------------------------------------------------------------------- #
-def verify_onnx_structure(output_path: Path, opset: int, image_size: Tuple[int, int]) -> None:
+def verify_onnx_structure(
+    output_path: Path, opset: int, image_size: Tuple[int, int]
+) -> None:
     try:
         import onnx
     except ImportError as exc:
-        raise ExportError("The `onnx` package is required for verification (pip install onnx).") from exc
+        raise ExportError(
+            "The `onnx` package is required for verification (pip install onnx)."
+        ) from exc
 
     model = onnx.load(str(output_path))
     try:
@@ -136,23 +154,33 @@ def verify_onnx_structure(output_path: Path, opset: int, image_size: Tuple[int, 
     opsets = {imp.domain or "ai.onnx": imp.version for imp in model.opset_import}
     exported_opset = opsets.get("ai.onnx")
     if exported_opset != opset:
-        logger.warning("Requested opset %d but the model declares opset %s.", opset, exported_opset)
+        logger.warning(
+            "Requested opset %d but the model declares opset %s.", opset, exported_opset
+        )
 
     initializer_names = {init.name for init in model.graph.initializer}
     inputs = [i for i in model.graph.input if i.name not in initializer_names]
     outputs = list(model.graph.output)
     if len(inputs) != 1 or len(outputs) != 1:
-        raise ExportError(f"Expected 1 input and 1 output, found {len(inputs)} and {len(outputs)}.")
+        raise ExportError(
+            f"Expected 1 input and 1 output, found {len(inputs)} and {len(outputs)}."
+        )
 
     def dims(value_info) -> List[object]:
-        return [d.dim_param or d.dim_value for d in value_info.type.tensor_type.shape.dim]
+        return [
+            d.dim_param or d.dim_value for d in value_info.type.tensor_type.shape.dim
+        ]
 
     in_dims, out_dims = dims(inputs[0]), dims(outputs[0])
     height, width = image_size
     if not isinstance(in_dims[0], str) or not isinstance(out_dims[0], str):
-        raise ExportError(f"Batch dimension is not dynamic (input {in_dims}, output {out_dims}).")
+        raise ExportError(
+            f"Batch dimension is not dynamic (input {in_dims}, output {out_dims})."
+        )
     if in_dims[1:] != [3, height, width]:
-        raise ExportError(f"Input dims {in_dims} do not match (batch, 3, {height}, {width}).")
+        raise ExportError(
+            f"Input dims {in_dims} do not match (batch, 3, {height}, {width})."
+        )
     #  if out_dims[1:] != [1, height, width]:
     #       raise ExportError(f"Output dims {out_dims} do not match (batch, 1, {height}, {width}).")
 
@@ -175,12 +203,17 @@ def make_session(output_path: Path):
     try:
         import onnxruntime as ort
     except ImportError as exc:
-        raise ExportError("onnxruntime is required for verification (pip install onnxruntime).") from exc
+        raise ExportError(
+            "onnxruntime is required for verification (pip install onnxruntime)."
+        ) from exc
     return ort.InferenceSession(str(output_path), providers=["CPUExecutionProvider"])
 
 
 def verify_numerical_parity(
-    model: torch.nn.Module, output_path: Path, image_size: Tuple[int, int], tolerance: float
+    model: torch.nn.Module,
+    output_path: Path,
+    image_size: Tuple[int, int],
+    tolerance: float,
 ) -> None:
     height, width = image_size
     session = make_session(output_path)
@@ -193,9 +226,13 @@ def verify_numerical_parity(
         result = session.run([OUTPUT_NAME], {INPUT_NAME: x})[0]
 
         if result.shape != reference.shape:
-            raise ExportError(f"Shape mismatch at batch {batch}: ONNX {result.shape} vs PyTorch {reference.shape}.")
+            raise ExportError(
+                f"Shape mismatch at batch {batch}: ONNX {result.shape} vs PyTorch {reference.shape}."
+            )
         max_diff = float(np.abs(result - reference).max())
-        agreement = float(((result > 0) == (reference > 0)).mean())  # logits > 0  <=>  prob > 0.5
+        agreement = float(
+            ((result > 0) == (reference > 0)).mean()
+        )  # logits > 0  <=>  prob > 0.5
         logger.info(
             "Parity (batch %d): max |logit diff| = %.2e | binary-mask agreement = %.4f%%",
             batch,
@@ -215,23 +252,33 @@ def verify_preprocessing_parity(config: dict) -> None:
     try:
         import albumentations as A
     except ImportError:
-        logger.warning("Albumentations not installed; skipping preprocessing parity check.")
+        logger.warning(
+            "Albumentations not installed; skipping preprocessing parity check."
+        )
         return
-    from app.onnx_inference import preprocess_image  # imported lazily: needs onnxruntime
+    from app.onnx_inference import (
+        preprocess_image,
+    )  # imported lazily: needs onnxruntime
 
     prep = config["preprocessing"]
     size = (int(prep["image_size"][0]), int(prep["image_size"][1]))
     mean, std = tuple(prep["mean"]), tuple(prep["std"])
 
-    image = np.random.default_rng(1).integers(0, 256, size=(333, 517, 3), dtype=np.uint8)
-    reference = A.Compose([A.Resize(size[0], size[1]), A.Normalize(mean=mean, std=std)])(image=image)["image"]
+    image = np.random.default_rng(1).integers(
+        0, 256, size=(333, 517, 3), dtype=np.uint8
+    )
+    reference = A.Compose(
+        [A.Resize(size[0], size[1]), A.Normalize(mean=mean, std=std)]
+    )(image=image)["image"]
     reference = np.ascontiguousarray(reference.transpose(2, 0, 1))[np.newaxis]
     mine = preprocess_image(image, size, mean, std)
 
     max_diff = float(np.abs(reference - mine).max())
     logger.info("Preprocessing parity vs Albumentations: max abs diff = %.2e", max_diff)
     if mine.shape != reference.shape or max_diff > 1e-4:
-        raise ExportError("Runtime preprocessing differs from the training pipeline; predictions would drift.")
+        raise ExportError(
+            "Runtime preprocessing differs from the training pipeline; predictions would drift."
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -248,9 +295,15 @@ def time_calls(fn: Callable[[], object], runs: int, warmup: int = 3) -> List[flo
     return samples
 
 
-def benchmark(model: torch.nn.Module, output_path: Path, image_size: Tuple[int, int], runs: int) -> None:
+def benchmark(
+    model: torch.nn.Module, output_path: Path, image_size: Tuple[int, int], runs: int
+) -> None:
     height, width = image_size
-    x = np.random.default_rng(2).standard_normal((1, 3, height, width)).astype(np.float32)
+    x = (
+        np.random.default_rng(2)
+        .standard_normal((1, 3, height, width))
+        .astype(np.float32)
+    )
     x_t = torch.from_numpy(x)
     session = make_session(output_path)
 
@@ -263,8 +316,16 @@ def benchmark(model: torch.nn.Module, output_path: Path, image_size: Tuple[int, 
 
     torch_ms = time_calls(run_torch, runs)
     ort_ms = time_calls(run_ort, runs)
-    logger.info("Benchmark, batch 1, CPU, %d runs (PyTorch threads: %d):", runs, torch.get_num_threads())
-    logger.info("  PyTorch       mean %.1f ms | median %.1f ms", statistics.mean(torch_ms), statistics.median(torch_ms))
+    logger.info(
+        "Benchmark, batch 1, CPU, %d runs (PyTorch threads: %d):",
+        runs,
+        torch.get_num_threads(),
+    )
+    logger.info(
+        "  PyTorch       mean %.1f ms | median %.1f ms",
+        statistics.mean(torch_ms),
+        statistics.median(torch_ms),
+    )
     logger.info(
         "  ONNX Runtime  mean %.1f ms | median %.1f ms  (speed-up x%.1f)",
         statistics.mean(ort_ms),
@@ -286,8 +347,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--weights", type=Path, default=DEFAULT_WEIGHTS)
     p.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     p.add_argument("--opset", type=int, default=14)
-    p.add_argument("--tolerance", type=float, default=1e-3, help="Max allowed |logit| difference vs PyTorch.")
-    p.add_argument("--benchmark-runs", type=int, default=20, help="0 disables the benchmark.")
+    p.add_argument(
+        "--tolerance",
+        type=float,
+        default=1e-3,
+        help="Max allowed |logit| difference vs PyTorch.",
+    )
+    p.add_argument(
+        "--benchmark-runs", type=int, default=20, help="0 disables the benchmark."
+    )
     return p.parse_args()
 
 

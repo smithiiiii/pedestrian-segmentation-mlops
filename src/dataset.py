@@ -4,7 +4,11 @@ import numpy as np
 from albumentations.pytorch import ToTensorV2
 
 transform = A.Compose(
-    [A.Resize(256, 256), A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), ToTensorV2()]
+    [
+        A.Resize(256, 256),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ]
 )
 
 
@@ -23,5 +27,7 @@ def preprocess_image(image_bytes: bytes):
 
 def postprocess_mask(binary_mask: np.ndarray, orig_shape: tuple) -> np.ndarray:
     orig_h, orig_w = orig_shape
-    resized_mask = cv2.resize(binary_mask, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
+    resized_mask = cv2.resize(
+        binary_mask, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST
+    )
     return (resized_mask * 255).astype(np.uint8)

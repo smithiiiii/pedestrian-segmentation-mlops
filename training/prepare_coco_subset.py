@@ -19,7 +19,9 @@ except ImportError:
     COCO = None
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-ANNOTATIONS_ZIP_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+ANNOTATIONS_ZIP_URL = (
+    "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+)
 BIN_ORDER = ("small", "medium", "large")
 MANIFEST_COLUMNS = [
     "image_path",
@@ -54,14 +56,22 @@ def size_bin(frac: float) -> str:
     return "large"
 
 
-def download_file(url: str, dest: Path, retries: int = 3, timeout: int = 60, show_progress: bool = False) -> None:
+def download_file(
+    url: str,
+    dest: Path,
+    retries: int = 3,
+    timeout: int = 60,
+    show_progress: bool = False,
+) -> None:
     """Download to a temp file, then atomically move into place."""
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_name(dest.name + ".part")
     last_exc: Optional[Exception] = None
     for attempt in range(1, retries + 1):
         try:
-            with urllib.request.urlopen(url, timeout=timeout) as resp, open(tmp, "wb") as out:
+            with urllib.request.urlopen(url, timeout=timeout) as resp, open(
+                tmp, "wb"
+            ) as out:
                 total = int(resp.headers.get("Content-Length") or 0)
                 done = 0
                 while True:
@@ -72,7 +82,9 @@ def download_file(url: str, dest: Path, retries: int = 3, timeout: int = 60, sho
                     done += len(chunk)
                     if show_progress and total:
                         print(
-                            f"\r  {done / 1e6:.0f}/{total / 1e6:.0f} MB ({100 * done / total:.0f}%)", end="", flush=True
+                            f"\r  {done / 1e6:.0f}/{total / 1e6:.0f} MB ({100 * done / total:.0f}%)",
+                            end="",
+                            flush=True,
                         )
             if show_progress:
                 print()
@@ -100,7 +112,9 @@ def ensure_annotations(split: str, ann_file: Optional[Path], cache_dir: Path) ->
     zip_path = cache_dir / "annotations_trainval2017.zip"
     if not zip_path.exists():
         print(f"Downloading COCO annotations (~250 MB) from {ANNOTATIONS_ZIP_URL}")
-        download_file(ANNOTATIONS_ZIP_URL, zip_path, retries=3, timeout=120, show_progress=True)
+        download_file(
+            ANNOTATIONS_ZIP_URL, zip_path, retries=3, timeout=120, show_progress=True
+        )
 
     member = f"annotations/instances_{split}.json"
     print(f"Extracting {member}")
@@ -165,7 +179,9 @@ def process_image(
 
         mask = person_mask(coco, img_info, cat_ids)
         if mask.shape != (height, width):
-            mask = np.array(Image.fromarray(mask).resize((width, height), Image.NEAREST))
+            mask = np.array(
+                Image.fromarray(mask).resize((width, height), Image.NEAREST)
+            )
         binary = (mask > 0).astype(np.uint8)
         masks_dir.mkdir(parents=True, exist_ok=True)
         Image.fromarray(binary * 255, mode="L").save(mask_path)
@@ -189,7 +205,9 @@ def process_image(
         return None
 
 
-def build_coco_subset(args: argparse.Namespace, images_dir: Path, masks_dir: Path) -> List[dict]:
+def build_coco_subset(
+    args: argparse.Namespace, images_dir: Path, masks_dir: Path
+) -> List[dict]:
     ann_dir = resolve(args.output_dir) / "annotations_cache"
     ann_path = ensure_annotations(args.coco_split, args.ann_file, ann_dir)
 
@@ -235,7 +253,15 @@ def build_coco_subset(args: argparse.Namespace, images_dir: Path, masks_dir: Pat
             pos += need
             with ThreadPoolExecutor(max_workers=args.workers) as pool:
                 futures = [
-                    pool.submit(process_image, coco, coco.loadImgs(i)[0], cat_ids, images_dir, masks_dir) for i in batch
+                    pool.submit(
+                        process_image,
+                        coco,
+                        coco.loadImgs(i)[0],
+                        cat_ids,
+                        images_dir,
+                        masks_dir,
+                    )
+                    for i in batch
                 ]
                 for fut in futures:
                     rec = fut.result()
@@ -246,7 +272,9 @@ def build_coco_subset(args: argparse.Namespace, images_dir: Path, masks_dir: Pat
     return records
 
 
-def build_penn_records(penn_root: Path, binary_mask_dir: Path, val_split: float, seed: int) -> List[dict]:
+def build_penn_records(
+    penn_root: Path, binary_mask_dir: Path, val_split: float, seed: int
+) -> List[dict]:
     """Penn-Fudan TRAIN split (same split rule as the Colab script) with 0/255 masks."""
     img_dir, inst_mask_dir = penn_root / "PNGImages", penn_root / "PedMasks"
     if not img_dir.is_dir() or not inst_mask_dir.is_dir():
@@ -287,7 +315,9 @@ def build_penn_records(penn_root: Path, binary_mask_dir: Path, val_split: float,
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Prepare COCO person subset + unified manifest.")
+    p = argparse.ArgumentParser(
+        description="Prepare COCO person subset + unified manifest."
+    )
     p.add_argument("--num-images", type=int, default=1000)
     p.add_argument(
         "--coco-split",
@@ -296,7 +326,10 @@ def parse_args() -> argparse.Namespace:
         help="val2017 annotations are small (~25 MB). train2017 needs ~2-3 GB RAM to load.",
     )
     p.add_argument(
-        "--ann-file", type=Path, default=None, help="Use an existing instances_*.json instead of downloading."
+        "--ann-file",
+        type=Path,
+        default=None,
+        help="Use an existing instances_*.json instead of downloading.",
     )
     p.add_argument(
         "--min-area-frac",
@@ -320,16 +353,31 @@ def parse_args() -> argparse.Namespace:
         default=Path("data/penn_fudan_binary/masks"),
         help="Where Penn-Fudan masks are re-saved as 0/255 binary PNGs.",
     )
-    p.add_argument("--val-split", type=float, default=0.2, help="Penn-Fudan val fraction; must match training.")
-    p.add_argument("--penn-seed", type=int, default=42, help="Penn-Fudan split seed; must match training.")
-    p.add_argument("--manifest", type=Path, default=Path("data/combined_train_manifest.csv"))
+    p.add_argument(
+        "--val-split",
+        type=float,
+        default=0.2,
+        help="Penn-Fudan val fraction; must match training.",
+    )
+    p.add_argument(
+        "--penn-seed",
+        type=int,
+        default=42,
+        help="Penn-Fudan split seed; must match training.",
+    )
+    p.add_argument(
+        "--manifest", type=Path, default=Path("data/combined_train_manifest.csv")
+    )
     return p.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     if COCO is None:
-        print("pycocotools is not installed. Run: pip install pycocotools", file=sys.stderr)
+        print(
+            "pycocotools is not installed. Run: pip install pycocotools",
+            file=sys.stderr,
+        )
         return 1
     if args.num_images < 1:
         print("--num-images must be >= 1", file=sys.stderr)
@@ -342,7 +390,10 @@ def main() -> int:
 
     try:
         penn_records = build_penn_records(
-            resolve(args.penn_root), resolve(args.penn_binary_dir), args.val_split, args.penn_seed
+            resolve(args.penn_root),
+            resolve(args.penn_binary_dir),
+            args.val_split,
+            args.penn_seed,
         )
         print(f"Penn-Fudan training samples: {len(penn_records)}")
         coco_records = build_coco_subset(args, images_dir, masks_dir)
@@ -359,12 +410,16 @@ def main() -> int:
         writer.writerows(records)
 
     print("\nManifest summary")
-    print(f"{'source':<10} | {'small':>6} | {'medium':>6} | {'large':>6} | {'total':>6}")
+    print(
+        f"{'source':<10} | {'small':>6} | {'medium':>6} | {'large':>6} | {'total':>6}"
+    )
     print("-" * 46)
     for source in ("pennfudan", "coco"):
         subset = [r for r in records if r["source"] == source]
         per_bin = [sum(1 for r in subset if r["size_bin"] == b) for b in BIN_ORDER]
-        print(f"{source:<10} | {per_bin[0]:>6} | {per_bin[1]:>6} | {per_bin[2]:>6} | {len(subset):>6}")
+        print(
+            f"{source:<10} | {per_bin[0]:>6} | {per_bin[1]:>6} | {per_bin[2]:>6} | {len(subset):>6}"
+        )
     print("-" * 46)
     print(f"{'all':<10} | {'':>6} | {'':>6} | {'':>6} | {len(records):>6}")
     print(f"\nManifest saved to {manifest_path}")
