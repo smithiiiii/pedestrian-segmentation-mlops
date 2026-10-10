@@ -492,6 +492,8 @@ Potential next steps, if not already implemented:
 
 Specify the repository's actual license here. Do not imply that the code, model weights, or training dataset are openly licensed unless their respective licensing terms permit it.
 
----
-
 **Project focus:** Deploying a computer vision model through an optimized inference runtime, a containerized API, and automated engineering quality gates.
+
+* **Author:** [Smithika S]
+* **GitHub Profile:** [github.com/smithiiiii](https://github.com/smithiiiii)
+* **Repository Link:** [github.com/smithiiiii/pedestrian-segmentation-mlops](https://github.com/smithiiiii/pedestrian-segmentation-mlops)
